@@ -1,0 +1,5 @@
+POSTGRES_DB=smart_education_portal
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+REDIS_HOST=localhost
+REDIS_PORT=6379
