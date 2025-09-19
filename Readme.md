@@ -77,13 +77,11 @@ Primary goals:
 - JWT Authentication
 
 ### Logos / Badges
-```markdown
 ![Java](https://img.shields.io/badge/Java-17-blue?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0-green?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Edge-green?logo=supabase&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker&logoColor=white)
-```
 
 ---
 
