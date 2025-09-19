@@ -6,7 +6,7 @@ The project is designed with scalability, modularity, and ease of deployment in 
 
 ---
 
-## 📖 Overview
+## Overview
 Educational institutions often struggle with manual attendance and scattered activity management.  
 This project provides a **digital-first solution** with:
 - Role-based authentication
@@ -17,7 +17,7 @@ This project provides a **digital-first solution** with:
 
 ---
 
-## ✨ Features
+## Features
 - **Role Management**
   - Admin: Manage users, institutions, and activities
   - Teacher: Record and monitor attendance, assign curriculum
@@ -69,7 +69,7 @@ This project provides a **digital-first solution** with:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Java 17+
