@@ -69,17 +69,19 @@ Primary goals:
 ---
 
 ## Technology Stack
-- Backend: Java 17+, Spring Boot, Maven  
-- Database: PostgreSQL (Supabase compatible)  
-- Deployment: Docker, Docker Compose  
-- Auth: JWT (JSON Web Tokens)  
-- Migrations: SQL files under `supabase/migrations`
 
-Badges (copy if you want visual badges on GitHub):
+### Core Technologies
+- Java 17+ (Spring Boot, Maven)
+- PostgreSQL / Supabase
+- Docker / Docker Compose
+- JWT Authentication
+
+### Logos / Badges
 ```markdown
 ![Java](https://img.shields.io/badge/Java-17-blue?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0-green?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?logo=postgresql&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Edge-green?logo=supabase&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker&logoColor=white)
 ```
 
@@ -88,12 +90,12 @@ Badges (copy if you want visual badges on GitHub):
 ## Getting Started
 
 ### Prerequisites
-- Java 17 or later
-- Maven (or use the included `./mvnw`)
+- Java 17+
+- Maven (or use `./mvnw`)
 - Docker and Docker Compose
-- PostgreSQL (or Supabase project)
+- PostgreSQL (or a Supabase project)
 
-### Clone the repository
+### Clone the Repository
 ```bash
 git clone https://github.com/medhxnsh/Smart_Curriculum_Activity_And_Attendance.git
 cd Smart_Curriculum_Activity_And_Attendance
@@ -102,13 +104,11 @@ cd Smart_Curriculum_Activity_And_Attendance
 ---
 
 ## Environment Variables (.env.example)
-Create a `.env` file at the project root. The following is a minimal example; do **not** commit real secrets.
-
 ```env
-# Database connection (postgres)
+# Database connection (Postgres)
 DATABASE_URL=postgres://username:password@localhost:5432/smart_curriculum
 
-# Spring Boot datasource (if using Spring)
+# Spring Boot datasource
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/smart_curriculum
 SPRING_DATASOURCE_USERNAME=username
 SPRING_DATASOURCE_PASSWORD=password
@@ -120,16 +120,9 @@ JWT_SECRET=replace_with_secure_secret
 SERVER_PORT=8080
 ```
 
-Save as `.env.example` and when configuring locally copy to `.env` and replace placeholders:
-```bash
-cp .env.example .env
-```
-
 ---
 
 ## Run with Docker Compose
-
-Start services:
 ```bash
 docker-compose up -d
 ```
@@ -139,7 +132,7 @@ Stop and remove containers:
 docker-compose down
 ```
 
-Log output:
+View logs:
 ```bash
 docker-compose logs -f
 ```
@@ -147,26 +140,12 @@ docker-compose logs -f
 ---
 
 ## Database Schema & Migrations
-Migrations are stored under `supabase/migrations`. They include table creation and essential constraints for:
-
-Core tables:
-- `institutions` — stores institution metadata
-- `users` — user records (with role references)
-- `roles` — role definitions (ADMIN, TEACHER, STUDENT)
-- `classes` / `sections` — grouping of students
-- `subjects` — subject definitions
-- `attendance` — attendance logs (student_id, class_id, subject_id, timestamp, method, status)
-- `curriculum_activities` — activity definitions and metadata
-- `activity_assignments` — mapping activities to classes/students and status
-- `audit_logs` — optional audit trail for changes
-
-Apply migrations (example):
+Apply migrations manually:
 ```bash
 psql -h localhost -U <db_user> -d smart_curriculum -f supabase/migrations/0001_initial.sql
-# run following migration files in order if present
 ```
 
-If using Supabase CLI:
+Or with Supabase CLI:
 ```bash
 supabase db push
 ```
@@ -174,8 +153,6 @@ supabase db push
 ---
 
 ## Mermaid ER Diagram
-Include this in README to visually represent core entities. GitHub renders Mermaid in Markdown if enabled; otherwise use Mermaid live editor or include a PNG generated from the diagram.
-
 ```mermaid
 erDiagram
     INSTITUTIONS {
@@ -209,20 +186,20 @@ erDiagram
     }
     ATTENDANCE {
         uuid attendance_id PK
-        uuid student_id FK "-> USERS.user_id"
+        uuid student_id FK
         uuid class_id FK
         uuid subject_id FK
         timestamp recorded_at
         string status
         string method
-        uuid recorded_by FK "-> USERS.user_id"
+        uuid recorded_by FK
     }
     CURRICULUM_ACTIVITIES {
         uuid activity_id PK
         string title
         text description
         date due_date
-        uuid created_by FK "-> USERS.user_id"
+        uuid created_by FK
     }
     ACTIVITY_ASSIGNMENTS {
         uuid assignment_id PK
@@ -244,67 +221,67 @@ erDiagram
     ROLES ||--o{ USERS : defines
     INSTITUTIONS ||--o{ CLASSES : owns
     CLASSES ||--o{ SUBJECTS : contains
-    CLASSES ||--o{ USERS : "students_in"
+    CLASSES ||--o{ USERS : students_in
     USERS ||--o{ ATTENDANCE : records
-    SUBJECTS ||--o{ ATTENDANCE : "for_subject"
+    SUBJECTS ||--o{ ATTENDANCE : for_subject
     USERS ||--o{ CURRICULUM_ACTIVITIES : creates
     CURRICULUM_ACTIVITIES ||--o{ ACTIVITY_ASSIGNMENTS : assigned_to
-    USERS ||--o{ AUDIT_LOGS : "performs"
+    USERS ||--o{ AUDIT_LOGS : performs
 ```
 
 ---
 
-## Workflows (Mermaid Flowcharts)
+## Workflows (Mermaid)
 
 ### Attendance Flow
 ```mermaid
 flowchart TD
-  A[Teacher / QR Scanner] --> B{Is QR valid?}
-  B -->|Yes| C[Lookup Student & Class]
-  B -->|No| D[Manual Entry]
+  A[Teacher or QR Scanner] --> B{Is QR valid}
+  B -->|Yes| C[Lookup student and class]
+  B -->|No| D[Manual entry by teacher]
   C --> E[Record attendance entry]
   D --> E
-  E --> F{Duplicate?}
-  F -->|Yes| G[Resolve duplicate (alert/log)]
-  F -->|No| H[Persist attendance, notify student]
+  E --> F{Is duplicate}
+  F -->|Yes| G[Resolve duplicate and log]
+  F -->|No| H[Persist attendance and notify student]
   H --> I[Update attendance reports]
 ```
 
 ### Curriculum / Activity Flow
 ```mermaid
 flowchart LR
-  TA[Teacher creates activity] --> AB{Target audience}
-  AB -->|Class| AC[Assign to class]
-  AB -->|Students| AD[Assign to specific students]
-  AC --> AE[Notify students]
-  AD --> AE
-  AE --> AF[Students submit / mark completed]
-  AF --> AG[Teacher reviews & grades]
-  AG --> AH[Update student activity status & reports]
+  T[Teacher creates activity] --> Chooser{Target audience}
+  Chooser -->|Class| AssignClass[Assign to class]
+  Chooser -->|Students| AssignStudents[Assign to students]
+  AssignClass --> Notify[Notify students]
+  AssignStudents --> Notify
+  Notify --> Submit[Students submit or mark complete]
+  Submit --> Review[Teacher reviews and grades]
+  Review --> Update[Update student activity status and reports]
 ```
 
 ### User Onboarding Flow
 ```mermaid
 flowchart TD
-  U[Admin creates user] --> E1[Send invite email]
-  E1 --> E2[User registers & sets password]
-  E2 --> E3[Assign role & link to institution/class]
-  E3 --> E4[User can login]
-  E4 --> E5{First time login?}
-  E5 -->|Yes| E6[Redirect to onboarding / profile setup]
-  E5 -->|No| E7[Redirect to dashboard]
+  Admin[Admin creates user] --> Invite[Send invitation email]
+  Invite --> Register[User registers and sets password]
+  Register --> Link[Assign role and link to institution/class]
+  Link --> Login[User logs in]
+  Login --> FirstTime{First time login}
+  FirstTime -->|Yes| Onboard[Redirect to onboarding and profile setup]
+  FirstTime -->|No| Dashboard[Redirect to dashboard]
 ```
 
 ---
 
 ## API Endpoints (Examples)
-> Replace `<base-url>` with your server address (default `http://localhost:8080`).
 
 ### Authentication
 ```http
 POST /api/auth/register
 Content-Type: application/json
-
+```
+```json
 {
   "email": "teacher@example.com",
   "password": "secure_password",
@@ -317,49 +294,27 @@ Content-Type: application/json
 ```http
 POST /api/auth/login
 Content-Type: application/json
-
+```
+```json
 {
   "email": "teacher@example.com",
   "password": "secure_password"
 }
 ```
 
-Response includes `accessToken` (JWT) to use in `Authorization: Bearer <token>` header.
-
 ### Attendance
 ```http
 POST /api/attendance/mark
 Authorization: Bearer <token>
 Content-Type: application/json
-
+```
+```json
 {
   "studentId": "<uuid>",
   "classId": "<uuid>",
   "subjectId": "<uuid>",
   "status": "PRESENT",
   "method": "QR"
-}
-```
-
-```http
-GET /api/attendance/class/{classId}?date=2025-09-20
-Authorization: Bearer <token>
-```
-
-### Curriculum
-```http
-POST /api/curriculum/create
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "Chapter 5 Homework",
-  "description": "Exercises 1-10",
-  "dueDate": "2025-10-01",
-  "target": {
-    "type": "CLASS",
-    "id": "<classId>"
-  }
 }
 ```
 
@@ -377,7 +332,7 @@ Content-Type: application/json
 java -jar target/<artifact-name>.jar
 ```
 
-### Run in development
+### Development
 ```bash
 ./mvnw spring-boot:run
 ```
@@ -390,7 +345,6 @@ java -jar target/<artifact-name>.jar
 ---
 
 ## Architecture
-High-level architecture:
 ```
 [Frontend App] <---> [Java Spring Boot API] <---> [PostgreSQL / Supabase]
                        |                          ^
@@ -399,34 +353,24 @@ High-level architecture:
                        +--> [Audit & Logging]
 ```
 
-- The backend exposes REST endpoints and enforces role-based authorization.
-- Database migration files maintain schema and make deployments reproducible.
-- Docker Compose provides quick local environment bootstrapping.
-
 ---
 
 ## Future Enhancements
-- Dedicated frontend (React / Angular / Flutter) with role-specific dashboards
-- Mobile apps for Android / iOS
-- Analytics and visual dashboards (attendance trends, activity completion)
+- React/Angular/Flutter frontend with dashboards
+- Mobile apps for teachers and students
+- Analytics dashboards for attendance & performance
 - Notifications (email, SMS, push)
-- LMS integrations and grade sync
-- Biometric/device integration for attendance
-- Multi-tenant SaaS support and billing
+- Biometric attendance integration
+- Multi-tenant SaaS features
 
 ---
 
 ## Contributing
 1. Fork the repository  
 2. Create a feature branch (`git checkout -b feature/my-feature`)  
-3. Commit changes with clear messages (`git commit -m "Add feature"`)  
-4. Push to your branch (`git push origin feature/my-feature`)  
-5. Open a Pull Request and describe the change and rationale
-
-Before submitting:
-- Run `./mvnw test`
-- Ensure database migrations are added under `supabase/migrations`
-- Update README and API docs if you add endpoints
+3. Commit changes (`git commit -m "Add feature"`)  
+4. Push (`git push origin feature/my-feature`)  
+5. Open a Pull Request  
 
 ---
 
@@ -436,5 +380,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 ---
 
 ## Author
-Medhansh Vibhu  
-GitHub: https://github.com/medhxnsh
+**Medhansh Vibhu**  
+GitHub: [medhxnsh](https://github.com/medhxnsh)
