@@ -1,8 +1,11 @@
 package com.SynapseX.Smart_Curriculum_Activity_And_Attendance.people.model;
 
+import com.SynapseX.Smart_Curriculum_Activity_And_Attendance.academic.model.Department;
 import com.SynapseX.Smart_Curriculum_Activity_And_Attendance.user.model.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "faculty")
@@ -22,12 +25,16 @@ public class Faculty {
     @JoinColumn(name = "faculty_id")
     private UserEntity user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     @Column(name = "employee_id", length = 64)
     private String employeeId;
 
     @Column(name = "joining_date")
-    private java.time.LocalDate joiningDate;
+    private LocalDate joiningDate;
 
     @Column(name = "metadata", columnDefinition = "jsonb")
-    private String metadata; // store JSON string; change to Map if needed
+    private String metadata;
 }

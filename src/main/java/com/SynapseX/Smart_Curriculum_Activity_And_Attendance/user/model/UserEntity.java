@@ -20,34 +20,30 @@ public class UserEntity {
     @Column(name = "user_id", nullable = false, updatable = false)
     private String userId;
 
-    @Column(unique = true, nullable = false, length = 100)
-    private String username; // could also be email in future
+    @Column(name = "institution_id")
+    private String institutionId;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "primary_email", unique = true, nullable = false, length = 320)
+    private String primaryEmail;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
-    private Set<String> roles; // e.g. ROLE_ADMIN, ROLE_USER
+    @Column(name = "display_name", length = 255)
+    private String displayName;
 
-    @Column(nullable = false)
-    private Boolean active = true;
+    @Column(name = "phone", length = 32)
+    private String phone;
+
+    @Column(name = "profile", columnDefinition = "jsonb")
+    private String profile;
 
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private OffsetDateTime updatedAt;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     @PrePersist
     public void prePersist() {
         createdAt = OffsetDateTime.now();
-        updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = OffsetDateTime.now();
+        if (isActive == null) isActive = true;
     }
 }

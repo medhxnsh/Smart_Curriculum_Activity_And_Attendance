@@ -25,14 +25,14 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
             );
 
             String token = jwtUtil.generateToken(authentication.getName());
             return ResponseEntity.ok().body(token);
 
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Invalid username or password");
+            return ResponseEntity.status(401).body("Invalid email or password");
         }
     }
 }
